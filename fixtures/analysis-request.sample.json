@@ -1,0 +1,11 @@
+{
+  "document_id": "sample-policy-v1",
+  "source_type": "text",
+  "text": "We collect your name, email address, location, and device identifiers. We may share personal information with advertising partners. We retain information for as long as necessary for business purposes. You may request access to or deletion of your personal information.",
+  "clauses": [
+    { "clause_id": "clause-1", "text": "We collect your name, email address, location, and device identifiers.", "section_heading": "Information we collect", "start_offset": 0, "end_offset": 74, "tags": ["data_collection"], "confidence": 0.96 },
+    { "clause_id": "clause-2", "text": "We may share personal information with advertising partners.", "section_heading": "How we share information", "start_offset": 75, "end_offset": 135, "tags": ["data_sharing"], "confidence": 0.94 },
+    { "clause_id": "clause-3", "text": "We retain information for as long as necessary for business purposes.", "section_heading": "Retention", "start_offset": 136, "end_offset": 205, "tags": ["retention"], "confidence": 0.89 },
+    { "clause_id": "clause-4", "text": "You may request access to or deletion of your personal information.", "section_heading": "Your rights", "start_offset": 206, "end_offset": 275, "tags": ["user_rights"], "confidence": 0.97 }
+  ]
+}

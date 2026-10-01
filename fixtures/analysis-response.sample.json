@@ -1,0 +1,24 @@
+{
+  "analysis_id": "analysis-sample-policy-v1",
+  "engine_version": "0.1.0",
+  "rule_set_version": "0.1.0",
+  "analyzed_at": "2026-10-01T12:00:00Z",
+  "trust_score": 57.0,
+  "risk_level": "moderate",
+  "categories": [
+    { "id": "data_sharing", "label": "Data sharing", "weight": 0.25, "score": 40, "weighted_score": 10, "status": "assessed", "rationale": "The policy describes sharing with advertising partners.", "finding_ids": ["finding-sharing-advertising"] },
+    { "id": "readability", "label": "Readability and transparency", "weight": 0.2, "score": 70, "weighted_score": 14, "status": "assessed", "rationale": "The supplied clauses are concise, but this is not a full readability assessment.", "finding_ids": [] },
+    { "id": "data_collection", "label": "Data collection", "weight": 0.2, "score": 50, "weighted_score": 10, "status": "assessed", "rationale": "The policy discloses location and device identifier collection.", "finding_ids": ["finding-collection-sensitive"] },
+    { "id": "legal_language", "label": "Legal language", "weight": 0.2, "score": 55, "weighted_score": 11, "status": "assessed", "rationale": "An open-ended retention statement was found.", "finding_ids": ["finding-retention-vague"] },
+    { "id": "user_agency", "label": "User agency", "weight": 0.15, "score": 80, "weighted_score": 12, "status": "assessed", "rationale": "The policy provides access and deletion requests.", "finding_ids": [] }
+  ],
+  "findings": [
+    { "finding_id": "finding-sharing-advertising", "rule_id": "DSHARE-001", "category": "data_sharing", "severity": "high", "status": "signal", "title": "Advertising-partner sharing disclosed", "explanation": "The policy says personal information may be shared with advertising partners.", "evidence": [{ "clause_id": "clause-2", "excerpt": "share personal information with advertising partners" }], "regulations": [{ "framework": "CCPA_CPRA", "reference": "Consumer rights notices", "source_url": "https://oag.ca.gov/privacy/ccpa", "reviewed_on": "2026-10-01" }], "next_step": "Review whether the policy describes applicable opt-out choices." },
+    { "finding_id": "finding-collection-sensitive", "rule_id": "DCOLL-001", "category": "data_collection", "severity": "medium", "status": "signal", "title": "Location and device identifier collection disclosed", "explanation": "The policy describes collection of location and device identifiers.", "evidence": [{ "clause_id": "clause-1", "excerpt": "location, and device identifiers" }], "regulations": [], "next_step": "Review the stated purposes and controls for these data categories." },
+    { "finding_id": "finding-retention-vague", "rule_id": "RET-001", "category": "legal_language", "severity": "medium", "status": "requires_review", "title": "Open-ended retention language", "explanation": "The retention period is tied to business purposes rather than a stated period or criteria.", "evidence": [{ "clause_id": "clause-3", "excerpt": "as long as necessary for business purposes" }], "regulations": [{ "framework": "GDPR", "reference": "Article 5(1)(e)", "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj", "reviewed_on": "2026-10-01" }], "next_step": "Review whether the full policy gives users enough retention information." }
+  ],
+  "positive_signals": [{ "signal_id": "agency-access-deletion", "category": "user_agency", "title": "Access and deletion requests mentioned", "evidence": [{ "clause_id": "clause-4", "excerpt": "request access to or deletion" }] }],
+  "limitations": ["This result is an automated text-based signal, not legal advice or a legal compliance determination."],
+  "coverage": { "assessed_categories": 5, "total_categories": 5, "status": "complete" },
+  "disclaimer": "Automated educational analysis only; review the complete policy and seek qualified advice when needed."
+}
