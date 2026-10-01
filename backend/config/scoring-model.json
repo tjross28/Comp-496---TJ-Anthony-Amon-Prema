@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "score_meaning": "100 indicates stronger transparency and user-protective signals in the assessed text; it is not a legal compliance determination.",
+  "weights": {
+    "data_sharing": 0.25,
+    "readability": 0.2,
+    "data_collection": 0.2,
+    "legal_language": 0.2,
+    "user_agency": 0.15
+  },
+  "risk_thresholds": {
+    "high": "trust_score < 40",
+    "moderate": "40 <= trust_score < 65",
+    "low": "trust_score >= 65"
+  },
+  "missing_evidence": "Unassessed categories are excluded from the normalized score and reported through coverage; they must not be treated as favorable evidence."
+}
