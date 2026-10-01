@@ -1,0 +1,12 @@
+{
+  "request": {
+    "document_id": "calibration-negated-v1",
+    "source_type": "text",
+    "text": "We do not share personal information with advertising partners. This policy uses direct sentences so that the analyzer can assess readability without confusing a denial with a sharing disclosure.",
+    "clauses": [
+      { "clause_id": "c1", "text": "We do not share personal information with advertising partners.", "start_offset": 0, "end_offset": 64 },
+      { "clause_id": "c2", "text": "This policy uses direct sentences so that the analyzer can assess readability without confusing a denial with a sharing disclosure.", "start_offset": 65, "end_offset": 190 }
+    ]
+  },
+  "expected": { "coverage": "partial", "excluded_rule_ids": ["DSHARE-001"], "min_trust_score": 60, "max_trust_score": 100 }
+}
