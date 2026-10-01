@@ -10,7 +10,9 @@ from app import create_app
 
 class ApiTests(unittest.TestCase):
     def setUp(self):
-        self.client = create_app().test_client()
+        app = create_app()
+        app.config.update(TESTING=True, RATE_LIMIT=20, RATE_WINDOW_SECONDS=60)
+        self.client = app.test_client()
         fixture = Path(__file__).resolve().parents[2] / "fixtures" / "analysis-request.sample.json"
         self.payload = json.loads(fixture.read_text(encoding="utf-8"))
 
@@ -38,6 +40,22 @@ class ApiTests(unittest.TestCase):
         response = self.client.post("/api/v1/analyses", data="not-json", content_type="text/plain")
         self.assertEqual(415, response.status_code)
         self.assertEqual("unsupported_media_type", response.get_json()["error"]["code"])
+
+    def test_api_token_is_required_when_configured(self):
+        app = create_app()
+        app.config.update(TESTING=True, ANALYSIS_API_TOKEN="test-token")
+        client = app.test_client()
+        self.assertEqual(401, client.post("/api/v1/analyses", json=self.payload).status_code)
+        self.assertEqual(200, client.post("/api/v1/analyses", json=self.payload, headers={"X-Analysis-Token": "test-token"}).status_code)
+
+    def test_rate_limit_rejects_excess_requests(self):
+        app = create_app()
+        app.config.update(TESTING=True, RATE_LIMIT=1, RATE_WINDOW_SECONDS=60)
+        client = app.test_client()
+        self.assertEqual(200, client.post("/api/v1/analyses", json=self.payload).status_code)
+        response = client.post("/api/v1/analyses", json=self.payload)
+        self.assertEqual(429, response.status_code)
+        self.assertEqual("rate_limited", response.get_json()["error"]["code"])
 
 
 if __name__ == "__main__":
