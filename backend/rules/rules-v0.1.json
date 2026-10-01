@@ -1,0 +1,132 @@
+{
+  "version": "0.1.0",
+  "reviewed_on": "2026-10-01",
+  "disclaimer": "Rules evaluate supplied policy text for educational risk signals. They do not determine legal applicability or compliance.",
+  "rules": [
+    {
+      "id": "DCOLL-001",
+      "title": "Location or device identifier collection disclosed",
+      "category": "data_collection",
+      "severity": "medium",
+      "status": "signal",
+      "score_impact": -15,
+      "concern_patterns": ["precise location", "location information", "device identifier", "device identifiers"],
+      "positive_patterns": [],
+      "exclusions": ["do not collect location", "do not collect device"],
+      "explanation": "The policy describes collection of location information or device identifiers.",
+      "next_step": "Review the stated purpose, retention period, and available controls for these data categories.",
+      "regulations": []
+    },
+    {
+      "id": "DSHARE-001",
+      "title": "Advertising or third-party sharing disclosed",
+      "category": "data_sharing",
+      "severity": "high",
+      "status": "signal",
+      "score_impact": -25,
+      "concern_patterns": ["share personal information with advertising", "share your personal information with advertising", "third-party advertising", "third party advertising", "sell or share your personal information"],
+      "positive_patterns": [],
+      "exclusions": ["do not share personal information with advertising", "we do not sell or share"],
+      "explanation": "The policy describes sharing personal information for advertising or with third parties.",
+      "next_step": "Review whether applicable opt-out choices and sharing purposes are explained.",
+      "regulations": [
+        {
+          "framework": "CCPA_CPRA",
+          "reference": "Right to opt-out of sale or sharing",
+          "source_url": "https://oag.ca.gov/privacy/ccpa",
+          "reviewed_on": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "RET-001",
+      "title": "Open-ended retention language",
+      "category": "legal_language",
+      "severity": "medium",
+      "status": "requires_review",
+      "score_impact": -20,
+      "concern_patterns": ["as long as necessary for business purposes", "as long as necessary", "indefinitely"],
+      "positive_patterns": [],
+      "exclusions": [],
+      "explanation": "The policy uses open-ended retention wording rather than a stated period or clear criteria.",
+      "next_step": "Review the complete policy for retention periods or criteria that qualify this statement.",
+      "regulations": [
+        {
+          "framework": "GDPR",
+          "reference": "Article 5(1)(e) - storage limitation",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+          "reviewed_on": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "AGENCY-001",
+      "title": "Access or deletion request described",
+      "category": "user_agency",
+      "severity": "info",
+      "status": "signal",
+      "score_impact": 20,
+      "concern_patterns": [],
+      "positive_patterns": ["request access", "right to access", "request deletion", "right to delete", "delete your personal information"],
+      "exclusions": [],
+      "explanation": "The policy describes a way to request access to or deletion of personal information.",
+      "next_step": "Review eligibility, verification, timing, and exceptions in the complete policy.",
+      "regulations": [
+        {
+          "framework": "GDPR",
+          "reference": "Articles 15 and 17 - access and erasure",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+          "reviewed_on": "2026-10-01"
+        },
+        {
+          "framework": "CCPA_CPRA",
+          "reference": "Rights to know and delete",
+          "source_url": "https://oag.ca.gov/privacy/ccpa",
+          "reviewed_on": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "CCPA-OPT-OUT-001",
+      "title": "Sale or sharing opt-out control described",
+      "category": "user_agency",
+      "severity": "info",
+      "status": "signal",
+      "score_impact": 15,
+      "concern_patterns": [],
+      "positive_patterns": ["do not sell or share", "opt out of the sale", "opt-out of the sale", "opt out of sale or sharing", "global privacy control"],
+      "exclusions": [],
+      "explanation": "The policy describes an opt-out control related to sale or sharing.",
+      "next_step": "Review whether the control is applicable, accessible, and explained in context.",
+      "regulations": [
+        {
+          "framework": "CCPA_CPRA",
+          "reference": "Right to opt-out of sale or sharing",
+          "source_url": "https://oag.ca.gov/privacy/ccpa",
+          "reviewed_on": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "GDPR-TRANSPARENCY-001",
+      "title": "Purpose-of-processing language described",
+      "category": "readability",
+      "severity": "info",
+      "status": "signal",
+      "score_impact": 10,
+      "concern_patterns": [],
+      "positive_patterns": ["we use your information to", "we use personal information to", "purpose of processing", "we process your personal data to"],
+      "exclusions": [],
+      "explanation": "The policy describes a purpose for processing information.",
+      "next_step": "Review whether the policy explains all material purposes and relevant choices clearly.",
+      "regulations": [
+        {
+          "framework": "GDPR",
+          "reference": "Article 13 - information to be provided",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+          "reviewed_on": "2026-10-01"
+        }
+      ]
+    }
+  ]
+}
