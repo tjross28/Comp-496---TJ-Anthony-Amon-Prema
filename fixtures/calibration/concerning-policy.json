@@ -1,0 +1,14 @@
+{
+  "request": {
+    "document_id": "calibration-concerning-v1",
+    "source_type": "text",
+    "text": "We collect location information and device identifiers. We may share personal information with advertising partners. We retain information for as long as necessary for business purposes. You may request access to or deletion of your personal information.",
+    "clauses": [
+      { "clause_id": "c1", "text": "We collect location information and device identifiers.", "start_offset": 0, "end_offset": 56 },
+      { "clause_id": "c2", "text": "We may share personal information with advertising partners.", "start_offset": 57, "end_offset": 117 },
+      { "clause_id": "c3", "text": "We retain information for as long as necessary for business purposes.", "start_offset": 118, "end_offset": 187 },
+      { "clause_id": "c4", "text": "You may request access to or deletion of your personal information.", "start_offset": 188, "end_offset": 257 }
+    ]
+  },
+  "expected": { "coverage": "complete", "rule_ids": ["DCOLL-001", "DSHARE-001", "RET-001"], "min_trust_score": 60, "max_trust_score": 70 }
+}

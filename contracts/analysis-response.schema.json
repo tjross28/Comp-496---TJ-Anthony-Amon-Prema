@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clearpolicy.local/contracts/analysis-response.schema.json",
+  "title": "Privacy policy analysis response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["analysis_id", "engine_version", "rule_set_version", "analyzed_at", "trust_score", "risk_level", "categories", "findings", "positive_signals", "limitations", "coverage", "disclaimer"],
+  "properties": {
+    "analysis_id": { "type": "string", "minLength": 1 },
+    "engine_version": { "type": "string", "minLength": 1 },
+    "rule_set_version": { "type": "string", "minLength": 1 },
+    "analyzed_at": { "type": "string", "format": "date-time" },
+    "trust_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "risk_level": { "type": "string", "enum": ["low", "moderate", "high", "unknown"] },
+    "categories": { "type": "array", "items": { "$ref": "#/$defs/category" } },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "positive_signals": { "type": "array", "items": { "$ref": "#/$defs/signal" } },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "coverage": { "type": "object", "additionalProperties": false, "required": ["assessed_categories", "total_categories", "status"], "properties": { "assessed_categories": { "type": "integer", "minimum": 0 }, "total_categories": { "type": "integer", "const": 5 }, "status": { "type": "string", "enum": ["complete", "partial", "insufficient_evidence"] } } },
+    "disclaimer": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "category": { "type": "object", "additionalProperties": false, "required": ["id", "label", "weight", "score", "weighted_score", "status", "rationale", "finding_ids"], "properties": { "id": { "type": "string", "enum": ["data_sharing", "readability", "data_collection", "legal_language", "user_agency"] }, "label": { "type": "string" }, "weight": { "type": "number", "minimum": 0, "maximum": 1 }, "score": { "type": "number", "minimum": 0, "maximum": 100 }, "weighted_score": { "type": "number", "minimum": 0, "maximum": 100 }, "status": { "type": "string", "enum": ["assessed", "insufficient_evidence"] }, "rationale": { "type": "string" }, "finding_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true } } },
+    "finding": { "type": "object", "additionalProperties": false, "required": ["finding_id", "rule_id", "category", "severity", "status", "title", "explanation", "evidence", "regulations"], "properties": { "finding_id": { "type": "string" }, "rule_id": { "type": "string" }, "category": { "type": "string" }, "severity": { "type": "string", "enum": ["info", "low", "medium", "high", "critical"] }, "status": { "type": "string", "enum": ["signal", "requires_review", "not_assessable_from_policy_text"] }, "title": { "type": "string" }, "explanation": { "type": "string" }, "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }, "regulations": { "type": "array", "items": { "$ref": "#/$defs/regulation" } }, "next_step": { "type": "string" } } },
+    "signal": { "type": "object", "additionalProperties": false, "required": ["signal_id", "category", "title", "evidence"], "properties": { "signal_id": { "type": "string" }, "category": { "type": "string" }, "title": { "type": "string" }, "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } } } },
+    "evidence": { "type": "object", "additionalProperties": false, "required": ["clause_id", "excerpt"], "properties": { "clause_id": { "type": "string" }, "excerpt": { "type": "string" } } },
+    "regulation": { "type": "object", "additionalProperties": false, "required": ["framework", "reference", "source_url", "reviewed_on"], "properties": { "framework": { "type": "string", "enum": ["GDPR", "CCPA_CPRA"] }, "reference": { "type": "string" }, "source_url": { "type": "string", "format": "uri" }, "reviewed_on": { "type": "string", "format": "date" } } }
+  }
+}

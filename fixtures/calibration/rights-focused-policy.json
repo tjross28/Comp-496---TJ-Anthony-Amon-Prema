@@ -1,0 +1,13 @@
+{
+  "request": {
+    "document_id": "calibration-rights-v1",
+    "source_type": "text",
+    "text": "We use your information to provide and improve the service. You have the right to access your personal information and request deletion. You may opt out of the sale or sharing of your personal information through our privacy controls.",
+    "clauses": [
+      { "clause_id": "c1", "text": "We use your information to provide and improve the service.", "start_offset": 0, "end_offset": 60 },
+      { "clause_id": "c2", "text": "You have the right to access your personal information and request deletion.", "start_offset": 61, "end_offset": 140 },
+      { "clause_id": "c3", "text": "You may opt out of the sale or sharing of your personal information through our privacy controls.", "start_offset": 141, "end_offset": 240 }
+    ]
+  },
+  "expected": { "coverage": "partial", "positive_rule_ids": ["AGENCY-001", "CCPA-OPT-OUT-001", "GDPR-TRANSPARENCY-001"], "min_trust_score": 90, "max_trust_score": 100 }
+}
