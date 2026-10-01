@@ -7,3 +7,11 @@ Run unit tests with:
 ```powershell
 & 'C:\Users\antho\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m unittest discover -s backend/tests -v
 ```
+
+Run the API locally with:
+
+```powershell
+& 'C:\Users\antho\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' backend/app.py
+```
+
+`POST /api/v1/analyses` accepts the request contract in `../contracts/analysis-request.schema.json` and returns the matching response contract. The service evaluates requests in memory; it does not persist policy text or log it.

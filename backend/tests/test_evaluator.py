@@ -16,7 +16,7 @@ class EvaluatorTests(unittest.TestCase):
     def test_evaluates_matched_clauses_into_traceable_findings(self):
         result = evaluate_document(self.request, analyzed_at="2026-10-01T12:00:00Z")
 
-        self.assertEqual("analysis-ba57fa3349c1", result["analysis_id"])
+        self.assertEqual("analysis-070f72d9ba3f", result["analysis_id"])
         self.assertEqual("0.1.0", result["rule_set_version"])
         self.assertEqual("complete", result["coverage"]["status"])
         self.assertEqual(3, len(result["findings"]))

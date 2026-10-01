@@ -136,8 +136,8 @@ def evaluate_document(request: Mapping[str, Any], *, catalog_path: str | Path | 
     if score_result["coverage"]["status"] != "complete":
         limitations.append("One or more score categories had insufficient evidence in the supplied clauses.")
 
-    document_id = str(request.get("document_id", "document"))
-    digest = hashlib.sha256(document_id.encode("utf-8")).hexdigest()[:12]
+    identity = f"{request.get('document_id', 'document')}\n{request.get('text', '')}"
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:12]
     return {
         "analysis_id": f"analysis-{digest}",
         "engine_version": ENGINE_VERSION,
