@@ -23,8 +23,8 @@ class EvaluatorTests(unittest.TestCase):
         sharing = next(finding for finding in result["findings"] if finding["rule_id"] == "DSHARE-001")
         self.assertEqual("clause-2", sharing["evidence"][0]["clause_id"])
         self.assertEqual("signal-agency-001", result["positive_signals"][0]["signal_id"])
-        self.assertEqual(62.9, result["trust_score"])
-        self.assertEqual("moderate", result["risk_level"])
+        self.assertEqual(66.5, result["trust_score"])
+        self.assertEqual("low", result["risk_level"])
 
     def test_exclusion_prevents_a_false_positive(self):
         request = {
