@@ -1,0 +1,90 @@
+{
+  "policy_level_split_seed": 496,
+  "validation_segment_count": 862,
+  "micro_precision_at_0_5": 0.7633,
+  "micro_recall_at_0_5": 0.6669,
+  "micro_f1_at_0_5": 0.7119,
+  "macro_f1_at_0_5": 0.615,
+  "exact_match_at_0_5": 0.3805,
+  "per_class": {
+    "Data Retention": {
+      "support": 34,
+      "precision": 0.7143,
+      "recall": 0.1471,
+      "f1": 0.2439
+    },
+    "Data Security": {
+      "support": 80,
+      "precision": 0.8148,
+      "recall": 0.55,
+      "f1": 0.6567
+    },
+    "Do Not Track": {
+      "support": 6,
+      "precision": 1.0,
+      "recall": 0.3333,
+      "f1": 0.5
+    },
+    "First Party Collection/Use": {
+      "support": 356,
+      "precision": 0.7618,
+      "recall": 0.7725,
+      "f1": 0.7671
+    },
+    "International and Specific Audiences": {
+      "support": 78,
+      "precision": 0.7595,
+      "recall": 0.7692,
+      "f1": 0.7643
+    },
+    "Other": {
+      "support": 412,
+      "precision": 0.7911,
+      "recall": 0.6893,
+      "f1": 0.7367
+    },
+    "Policy Change": {
+      "support": 50,
+      "precision": 0.7368,
+      "recall": 0.56,
+      "f1": 0.6364
+    },
+    "Third Party Sharing/Collection": {
+      "support": 255,
+      "precision": 0.7509,
+      "recall": 0.7804,
+      "f1": 0.7654
+    },
+    "User Access, Edit and Deletion": {
+      "support": 63,
+      "precision": 0.8519,
+      "recall": 0.3651,
+      "f1": 0.5111
+    },
+    "User Choice/Control": {
+      "support": 170,
+      "precision": 0.6803,
+      "recall": 0.4882,
+      "f1": 0.5685
+    }
+  },
+  "training_policy_count": 92,
+  "training_segment_count": 2928,
+  "validation_policy_count": 23,
+  "full_corpus_policy_count": 115,
+  "full_corpus_segment_count": 3790,
+  "full_corpus_category_counts": {
+    "Other": 2126,
+    "Policy Change": 383,
+    "First Party Collection/Use": 7135,
+    "Data Retention": 289,
+    "International and Specific Audiences": 501,
+    "Third Party Sharing/Collection": 4160,
+    "User Choice/Control": 1458,
+    "User Access, Edit and Deletion": 592,
+    "Data Security": 602,
+    "Do Not Track": 44
+  },
+  "full_model_vocabulary_size": 28731,
+  "model_artifact": "privacy_clause_model_v1.json"
+}

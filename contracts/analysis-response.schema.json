@@ -4,15 +4,17 @@
   "title": "Privacy policy analysis response",
   "type": "object",
   "additionalProperties": false,
-  "required": ["analysis_id", "engine_version", "rule_set_version", "analyzed_at", "trust_score", "risk_level", "categories", "findings", "positive_signals", "limitations", "coverage", "disclaimer"],
+  "required": ["analysis_id", "engine_version", "classifier_version", "rule_set_version", "analyzed_at", "trust_score", "risk_level", "categories", "clause_classifications", "findings", "positive_signals", "limitations", "coverage", "disclaimer"],
   "properties": {
     "analysis_id": { "type": "string", "minLength": 1 },
     "engine_version": { "type": "string", "minLength": 1 },
+    "classifier_version": { "type": "string", "minLength": 1 },
     "rule_set_version": { "type": "string", "minLength": 1 },
     "analyzed_at": { "type": "string", "format": "date-time" },
     "trust_score": { "type": "number", "minimum": 0, "maximum": 100 },
     "risk_level": { "type": "string", "enum": ["low", "moderate", "high", "unknown"] },
     "categories": { "type": "array", "items": { "$ref": "#/$defs/category" } },
+    "clause_classifications": { "type": "array", "items": { "$ref": "#/$defs/clause_classification" } },
     "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
     "positive_signals": { "type": "array", "items": { "$ref": "#/$defs/signal" } },
     "limitations": { "type": "array", "items": { "type": "string" } },
@@ -20,6 +22,8 @@
     "disclaimer": { "type": "string", "minLength": 1 }
   },
   "$defs": {
+    "clause_classification": { "type": "object", "additionalProperties": false, "required": ["clause_id", "excerpt", "predictions"], "properties": { "clause_id": { "type": "string", "minLength": 1 }, "excerpt": { "type": "string" }, "predictions": { "type": "array", "maxItems": 3, "items": { "$ref": "#/$defs/topic_prediction" } } } },
+    "topic_prediction": { "type": "object", "additionalProperties": false, "required": ["label", "dashboard_category", "score"], "properties": { "label": { "type": "string" }, "dashboard_category": { "type": ["string", "null"], "enum": ["data_collection", "data_sharing", "user_agency", "legal_language", null] }, "score": { "type": "number", "minimum": 0, "maximum": 1 } } },
     "category": { "type": "object", "additionalProperties": false, "required": ["id", "label", "weight", "score", "weighted_score", "status", "rationale", "finding_ids"], "properties": { "id": { "type": "string", "enum": ["data_sharing", "readability", "data_collection", "legal_language", "user_agency"] }, "label": { "type": "string" }, "weight": { "type": "number", "minimum": 0, "maximum": 1 }, "score": { "type": "number", "minimum": 0, "maximum": 100 }, "weighted_score": { "type": "number", "minimum": 0, "maximum": 100 }, "status": { "type": "string", "enum": ["assessed", "insufficient_evidence"] }, "rationale": { "type": "string" }, "finding_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true } } },
     "finding": { "type": "object", "additionalProperties": false, "required": ["finding_id", "rule_id", "category", "severity", "status", "title", "explanation", "evidence", "regulations"], "properties": { "finding_id": { "type": "string" }, "rule_id": { "type": "string" }, "category": { "type": "string" }, "severity": { "type": "string", "enum": ["info", "low", "medium", "high", "critical"] }, "status": { "type": "string", "enum": ["signal", "requires_review", "not_assessable_from_policy_text"] }, "title": { "type": "string" }, "explanation": { "type": "string" }, "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }, "regulations": { "type": "array", "items": { "$ref": "#/$defs/regulation" } }, "next_step": { "type": "string" } } },
     "signal": { "type": "object", "additionalProperties": false, "required": ["signal_id", "category", "title", "evidence"], "properties": { "signal_id": { "type": "string" }, "category": { "type": "string" }, "title": { "type": "string" }, "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } } } },

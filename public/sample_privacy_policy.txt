@@ -1,0 +1,24 @@
+ClearPolicy Demo Service - Fictional Privacy Policy
+
+This sample describes an imaginary service created for a classroom demonstration. It is not the policy of a real company.
+
+Information We Collect
+When you create an account, we collect the name and email address you provide. We also collect account settings and information about how you use the service. When you visit the site, we may collect your IP address, device identifiers, browser details, and approximate location information.
+
+How We Use and Share Information
+We use your information to provide the service, respond to support requests, protect accounts, and understand how people use the site. We may share personal information with advertising partners and analytics providers. These partners may receive device identifiers and browsing activity to measure advertisements and improve their services.
+
+Cookies and Similar Technologies
+We use cookies to remember your settings and measure site use. You can change cookie settings in your browser. Some features may not work as intended if you block all cookies.
+
+How Long We Keep Information
+We retain information for as long as necessary for business purposes. We may keep certain records longer when needed to resolve disputes, protect the service, or meet legal obligations.
+
+Your Choices and Requests
+You may request access to or deletion of your personal information by contacting our support team. You can correct some account details in your settings. You may opt out of targeted advertising through the privacy controls linked in your account settings. We may need some information to provide the service.
+
+Security
+We use access controls and encryption in transit to help protect information. No online service can guarantee that information will always be secure.
+
+Changes to This Policy
+We may update this policy from time to time. We will post the revised version on this page and update the date above. Your continued use of the service after an update means you have seen the revised notice.

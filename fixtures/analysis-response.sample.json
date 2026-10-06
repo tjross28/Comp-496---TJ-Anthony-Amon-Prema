@@ -1,6 +1,7 @@
 {
   "analysis_id": "analysis-sample-policy-v1",
   "engine_version": "0.1.0",
+  "classifier_version": "1.0.0",
   "rule_set_version": "0.1.0",
   "analyzed_at": "2026-10-01T12:00:00Z",
   "trust_score": 57.0,
@@ -11,6 +12,12 @@
     { "id": "data_collection", "label": "Data collection", "weight": 0.2, "score": 50, "weighted_score": 10, "status": "assessed", "rationale": "The policy discloses location and device identifier collection.", "finding_ids": ["finding-collection-sensitive"] },
     { "id": "legal_language", "label": "Legal language", "weight": 0.2, "score": 55, "weighted_score": 11, "status": "assessed", "rationale": "An open-ended retention statement was found.", "finding_ids": ["finding-retention-vague"] },
     { "id": "user_agency", "label": "User agency", "weight": 0.15, "score": 80, "weighted_score": 12, "status": "assessed", "rationale": "The policy provides access and deletion requests.", "finding_ids": [] }
+  ],
+  "clause_classifications": [
+    { "clause_id": "clause-1", "excerpt": "We collect your name, email address, location, and device identifiers.", "predictions": [{ "label": "First Party Collection/Use", "dashboard_category": "data_collection", "score": 1.0 }] },
+    { "clause_id": "clause-2", "excerpt": "We may share personal information with advertising partners.", "predictions": [{ "label": "Third Party Sharing/Collection", "dashboard_category": "data_sharing", "score": 1.0 }] },
+    { "clause_id": "clause-3", "excerpt": "We retain information for as long as necessary for business purposes.", "predictions": [{ "label": "Data Retention", "dashboard_category": "legal_language", "score": 1.0 }, { "label": "User Access, Edit and Deletion", "dashboard_category": "user_agency", "score": 0.9496 }] },
+    { "clause_id": "clause-4", "excerpt": "You may request access to or deletion of your personal information.", "predictions": [{ "label": "User Access, Edit and Deletion", "dashboard_category": "user_agency", "score": 0.9818 }, { "label": "Other", "dashboard_category": null, "score": 0.9758 }] }
   ],
   "findings": [
     { "finding_id": "finding-sharing-advertising", "rule_id": "DSHARE-001", "category": "data_sharing", "severity": "high", "status": "signal", "title": "Advertising-partner sharing disclosed", "explanation": "The policy says personal information may be shared with advertising partners.", "evidence": [{ "clause_id": "clause-2", "excerpt": "share personal information with advertising partners" }], "regulations": [{ "framework": "CCPA_CPRA", "reference": "Consumer rights notices", "source_url": "https://oag.ca.gov/privacy/ccpa", "reviewed_on": "2026-10-01" }], "next_step": "Review whether the policy describes applicable opt-out choices." },

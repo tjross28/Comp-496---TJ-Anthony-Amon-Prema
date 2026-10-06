@@ -12,6 +12,7 @@ from typing import Any
 from flask import Flask, jsonify, request
 
 from compliance_engine.evaluator import ENGINE_VERSION, evaluate_document
+from ml.privacy_classifier import MODEL_PATH, PrivacyClauseClassifier
 
 MAX_REQUEST_BYTES = int(os.environ.get("MAX_ANALYSIS_REQUEST_BYTES", "1000000"))
 DEFAULT_RATE_LIMIT = int(os.environ.get("ANALYSIS_RATE_LIMIT", "60"))
@@ -51,7 +52,9 @@ def create_app() -> Flask:
         RATE_LIMIT=DEFAULT_RATE_LIMIT,
         RATE_WINDOW_SECONDS=DEFAULT_RATE_WINDOW_SECONDS,
         RULESET_PATH=os.environ.get("ANALYSIS_RULESET_PATH") or None,
+        CLASSIFIER_PATH=os.environ.get("ANALYSIS_CLASSIFIER_PATH") or str(MODEL_PATH),
     )
+    classifier = PrivacyClauseClassifier.from_path(app.config["CLASSIFIER_PATH"])
     request_times: dict[str, list[float]] = {}
 
     def is_rate_limited(client_id: str) -> bool:
@@ -70,7 +73,7 @@ def create_app() -> Flask:
 
     @app.get("/healthz")
     def healthz():
-        return jsonify({"status": "ok", "engine_version": ENGINE_VERSION})
+        return jsonify({"status": "ok", "engine_version": ENGINE_VERSION, "classifier_version": classifier.version})
 
     @app.post("/api/v1/analyses")
     def create_analysis():
@@ -87,6 +90,8 @@ def create_app() -> Flask:
         try:
             started = time.monotonic()
             result = evaluate_document(payload, catalog_path=app.config["RULESET_PATH"])
+            result["classifier_version"] = classifier.version
+            result["clause_classifications"] = classifier.classify_clauses(payload["clauses"])
         except ValueError as exc:
             return _error(400, "invalid_analysis_request", str(exc))
         logger.info(
