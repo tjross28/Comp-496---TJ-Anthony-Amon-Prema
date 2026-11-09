@@ -1,60 +1,45 @@
 # ClearPolicy presentation script
 
-**Estimated run time:** about 5 minutes 30 seconds, including a 2 minute 30 second live demo.
+**Estimated run time:** about 5 minutes, including a 2-minute live demo.
 
 ## Before presenting
 
-1. Start the backend in one terminal: `.\.venv\Scripts\python.exe backend\app.py`. If dependencies are not installed, follow the one-time Windows setup in the project README.
-2. Start the interface in a second terminal: `pnpm dev`.
-3. Open the local URL printed by Vite and leave the policy field blank. Keep the browser with TJ for the demo.
-4. Use the fictional sample policy included in the project.
+1. Start Flask in one terminal with `OPENAI_API_KEY` set in that terminal.
+2. Start the interface in a second terminal with `pnpm dev`.
+3. Open the local Vite URL and choose the fictional sample policy.
 
-## Slide-by-slide script
+## Slide 1: The problem — Anthony
 
-### Slide 1: Opening — Anthony (0:20)
+**Cue:** Introduce the project and its purpose.
 
-**Cue:** Introduce the three presenters and the purpose of the project.
+**Anthony:** “Hi, we’re TJ, Anthony, and Amon. We built ClearPolicy to help people understand privacy policies without having to work through every sentence of dense legal language. The app turns the policy text into a readable overview and points readers back to passages they may want to inspect.”
 
-**Anthony:** “Hi, we’re TJ, Anthony, and Amon. We built ClearPolicy, a class prototype that helps readers find privacy policy language worth reviewing. Amon will show how the app handles a policy, I’ll explain the rule engine, and TJ will cover the clause tagger and run the live demo.”
+## Slide 2: How the app works — Amon
 
-### Slide 2: Analysis flow — Amon (0:40)
+**Cue:** Show the text field, backend, and results screen.
 
-**Cue:** Point to the interface, API, and the two analysis paths.
+**Amon:** “A reader pastes policy text or loads our fictional sample. The React interface sends the text to our Flask API. The backend sends the complete policy to GPT-6 Luna through the OpenAI Responses API, then returns a plain-language summary, useful details, passages to review, and questions for the reader.”
 
-**Amon:** “A reader can paste policy text or load the sample. The React interface splits the text into clauses and sends them to our Flask API. The API runs two separate analyses: the versioned rules engine returns findings and the weighted Trust Score, while the learned classifier suggests topics for clauses. The interface brings those results together so a reader can compare them with the policy wording. Submitted text is processed in memory and is not saved by the service.”
+## Slide 3: Reading the summary — Anthony
 
-### Slide 3: Rules and Trust Score — Anthony (0:45)
+**Cue:** Show the overview and one quoted detail.
 
-**Cue:** Walk through the category weights and explain what one rule finding contains.
+**Anthony:** “The overview is meant to make the main points easier to follow. Each highlighted detail includes a short quotation, and the backend checks that the quotation is present in the policy text. That makes it easier to trace the explanation to its source, though the explanation can still miss context or get something wrong.”
 
-**Anthony:** “Our rule engine uses versioned phrase rules and returns evidence with each finding: the matched wording, a plain-language explanation, and a suggested next step. The Trust Score weights data sharing at 25 percent, readability at 20, data collection at 20, legal language at 20, and user agency at 15. If the policy text does not provide enough evidence for a category, the app marks it as needing evidence and excludes it from the normalized score rather than treating it as favorable. The score summarizes transparency signals in the supplied text; it is not a legal compliance result.”
+## Slide 4: Natural-language model — TJ
 
-### Slide 4: OPP-115 clause tagger — TJ (0:45)
+**Cue:** Explain the model’s role and the API call.
 
-**Cue:** Explain the training set, policy-level holdout, and baseline results.
+**TJ:** “The app uses GPT-6 Luna through the OpenAI Responses API to read the submitted policy and explain it in everyday language. Structured Outputs keeps the response organized into sections; it doesn’t limit the model to fixed labels. The project does not fine-tune the hosted model or learn from individual submissions. We have not yet measured summary quality against a held-out set of policies reviewed by people.”
 
-**TJ:** “The clause tagger is a multi-label Naive Bayes model trained on consolidated OPP-115 annotations: 3,790 segments from 115 policies. We held out whole policies, using 92 for training and 23 for evaluation, which gave us 862 held-out segments. On that baseline, micro F1 was 0.7119, macro F1 was 0.6150, and exact label-set match was 0.3805. The final model artifact was then fit on all 115 policies. These topic tags are experimental, their scores are not calibrated probabilities, and they do not affect the Trust Score. The corpus is historical and limited to English website policies; this artifact is for non-commercial academic use under the OPP-115 terms.”
+## Slide 5: Live demo — TJ
 
-### Slide 5: Live demo — TJ (2:30)
+**Cue:** Load the fictional sample, create the summary, and compare a quote with its original sentence.
 
-**Cue:** Take browser control. Load the fictional sample, analyze it, then trace rule findings and any displayed clause tag back to the source text.
+**TJ:** “This sample was written for the classroom demonstration, not taken from a real company. I’ll show how the overview and quoted details make a long policy quicker to scan. We should still check important statements against the full text.”
 
-**TJ:** “I’ll run the sample policy through the app. It is fictional and was written for this classroom demonstration, not taken from a real company.”
+## Slide 6: Close — Anthony
 
-**Browser actions:**
+**Cue:** Summarize the project and its limits.
 
-- **Load:** Select Try sample policy. Briefly show the input text.
-- **Analyze:** Select Analyze policy and wait for the results.
-- **Trace:** Show the score and category coverage. Point to the advertising-sharing and open-ended-retention findings, then compare each with its source sentence. Note the access and deletion language. If a clause tag appears, read its topic and check the original clause.
-
-**TJ:** “The rules help me find language to review. A topic tag is only a model suggestion, and a missing tag does not mean a clause is unimportant. I’ll use the original policy text to interpret every signal. The app does not tell us whether the policy complies with a law.”
-
-### Slide 6: Project workstreams and close — Anthony (0:20)
-
-**Cue:** Recap the three project workstreams and thank the audience.
-
-**Anthony:** “Today, we’ve shown three connected areas: TJ’s clause model and demo, Amon’s API and interface integration, and my rule engine and scoring. Together, they make policy language easier to inspect while keeping evidence visible. This is an educational aid, not legal advice or proof of compliance. Thank you.”
-
-## Timing
-
-Opening and project explanation: about 2 minutes 50 seconds. Live demo: about 2 minutes 30 seconds. Closing and transitions bring the total to roughly 5 minutes 30 seconds.
+**Anthony:** “ClearPolicy helps a reader get oriented and decide what to look at more closely. It describes the submitted text; it does not establish what an organization does in practice or decide whether a policy complies with a law. It is an educational reading aid, not legal advice. Thank you.”

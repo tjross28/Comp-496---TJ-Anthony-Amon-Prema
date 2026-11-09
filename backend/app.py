@@ -1,23 +1,27 @@
-"""Flask API boundary for the in-memory compliance engine."""
+"""Flask API for plain-language privacy policy summaries."""
 
 from __future__ import annotations
 
-import os
-import hashlib
 import hmac
 import logging
+import os
 import time
+from datetime import datetime, timezone
 from typing import Any
+from uuid import uuid4
 
 from flask import Flask, jsonify, request
 
-from compliance_engine.evaluator import ENGINE_VERSION, evaluate_document
-from ml.privacy_classifier import MODEL_PATH, PrivacyClauseClassifier
+from ml.openai_nlp import NLPConfigurationError, NLPProviderError, OpenAIPolicyAnalyzer
 
 MAX_REQUEST_BYTES = int(os.environ.get("MAX_ANALYSIS_REQUEST_BYTES", "1000000"))
 DEFAULT_RATE_LIMIT = int(os.environ.get("ANALYSIS_RATE_LIMIT", "60"))
 DEFAULT_RATE_WINDOW_SECONDS = int(os.environ.get("ANALYSIS_RATE_WINDOW_SECONDS", "60"))
-logger = logging.getLogger("privacy_policy_analyzer.api")
+DISCLAIMER = (
+    "AI-generated reading aid, not legal advice or a legal compliance determination. "
+    "Check important details against the complete policy."
+)
+logger = logging.getLogger("clearpolicy.api")
 
 
 def _error(status: int, code: str, message: str):
@@ -27,34 +31,31 @@ def _error(status: int, code: str, message: str):
 def _validate_payload(payload: Any, max_request_bytes: int) -> str | None:
     if not isinstance(payload, dict):
         return "Request body must be a JSON object."
-    for field in ("document_id", "source_type", "text", "clauses"):
-        if field not in payload:
-            return f"Missing required field: {field}."
-    if payload["source_type"] not in {"text", "html", "pdf"}:
-        return "source_type must be text, html, or pdf."
-    if not isinstance(payload["text"], str) or not payload["text"].strip():
+    text = payload.get("text")
+    if not isinstance(text, str) or not text.strip():
         return "text must be a non-empty string."
-    if len(payload["text"].encode("utf-8")) > max_request_bytes:
+    if len(text.encode("utf-8")) > max_request_bytes:
         return "text exceeds the maximum supported size."
-    if not isinstance(payload["clauses"], list) or not payload["clauses"]:
-        return "clauses must be a non-empty array."
-    for index, clause in enumerate(payload["clauses"]):
-        if not isinstance(clause, dict) or not clause.get("clause_id") or not str(clause.get("text", "")).strip():
-            return f"clauses[{index}] requires non-empty clause_id and text."
     return None
 
 
-def create_app() -> Flask:
+def create_app(config_overrides: dict[str, Any] | None = None) -> Flask:
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = MAX_REQUEST_BYTES
     app.config.from_mapping(
         ANALYSIS_API_TOKEN=os.environ.get("ANALYSIS_API_TOKEN", ""),
         RATE_LIMIT=DEFAULT_RATE_LIMIT,
         RATE_WINDOW_SECONDS=DEFAULT_RATE_WINDOW_SECONDS,
-        RULESET_PATH=os.environ.get("ANALYSIS_RULESET_PATH") or None,
-        CLASSIFIER_PATH=os.environ.get("ANALYSIS_CLASSIFIER_PATH") or str(MODEL_PATH),
+        OPENAI_MODEL=os.environ.get("OPENAI_MODEL", "gpt-6-luna"),
+        OPENAI_API_KEY=os.environ.get("OPENAI_API_KEY", ""),
     )
-    classifier = PrivacyClauseClassifier.from_path(app.config["CLASSIFIER_PATH"])
+    if config_overrides:
+        app.config.update(config_overrides)
+
+    analyzer = app.config.get("AI_ANALYZER") or OpenAIPolicyAnalyzer(
+        model=app.config["OPENAI_MODEL"],
+        api_key=app.config["OPENAI_API_KEY"],
+    )
     request_times: dict[str, list[float]] = {}
 
     def is_rate_limited(client_id: str) -> bool:
@@ -73,7 +74,7 @@ def create_app() -> Flask:
 
     @app.get("/healthz")
     def healthz():
-        return jsonify({"status": "ok", "engine_version": ENGINE_VERSION, "classifier_version": classifier.version})
+        return jsonify({"status": "ok", "ai_model": analyzer.model})
 
     @app.post("/api/v1/analyses")
     def create_analysis():
@@ -83,27 +84,44 @@ def create_app() -> Flask:
             return _error(429, "rate_limited", "Too many analysis requests. Try again shortly.")
         if not request.is_json:
             return _error(415, "unsupported_media_type", "Content-Type must be application/json.")
+
         payload = request.get_json(silent=True)
         error = _validate_payload(payload, app.config["MAX_CONTENT_LENGTH"])
         if error:
             return _error(400, "invalid_analysis_request", error)
+
+        analysis_id = "analysis-" + uuid4().hex[:12]
+        started = time.monotonic()
         try:
-            started = time.monotonic()
-            result = evaluate_document(payload, catalog_path=app.config["RULESET_PATH"])
-            result["classifier_version"] = classifier.version
-            result["clause_classifications"] = classifier.classify_clauses(payload["clauses"])
-        except ValueError as exc:
-            return _error(400, "invalid_analysis_request", str(exc))
+            summary = analyzer.analyze_text(payload["text"])
+        except NLPConfigurationError as exc:
+            return _error(503, "ai_analysis_not_configured", str(exc))
+        except NLPProviderError:
+            logger.warning("summary_generation_failed provider=openai model=%s", analyzer.model)
+            return _error(
+                502,
+                "ai_analysis_unavailable",
+                "The AI summary could not be generated. Check the backend configuration and try again.",
+            )
+
+        result = {
+            "analysis_id": analysis_id,
+            "analyzed_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "model": analyzer.model,
+            **summary,
+            "disclaimer": DISCLAIMER,
+        }
         logger.info(
-            "analysis_completed request_fingerprint=%s analysis_id=%s rule_set_version=%s findings=%d duration_ms=%d",
-            hashlib.sha256(str(payload["document_id"]).encode("utf-8")).hexdigest()[:12],
-            result["analysis_id"], result["rule_set_version"], len(result["findings"]), (time.monotonic() - started) * 1000,
+            "summary_generated analysis_id=%s model=%s duration_ms=%d",
+            analysis_id,
+            analyzer.model,
+            (time.monotonic() - started) * 1000,
         )
         return jsonify(result), 200
 
     @app.errorhandler(413)
     def request_too_large(_error_value):
-        return _error(413, "request_too_large", "The request exceeds the maximum supported size.")
+        return _error(413, "request_too_large", "The policy text exceeds the maximum supported size.")
 
     return app
 

@@ -116,7 +116,7 @@ def add_heading(doc, text, level=1):
     paragraph.paragraph_format.keep_with_next = True
     paragraph.paragraph_format.space_before = Pt(8 if level == 1 else 5)
     paragraph.paragraph_format.space_after = Pt(4)
-    set_run_font(paragraph.add_run(text), size=16 if level == 1 else 11.5, bold=True, color=TEAL if level == 1 else INK)
+    set_run_font(paragraph.add_run(text), size=16 if level == 1 else 11.5, bold=True, color=INK)
     return paragraph
 
 
@@ -124,6 +124,15 @@ def add_table(doc, headers, rows, widths=None, font_size=9.2):
     table = doc.add_table(rows=1, cols=len(headers))
     table.autofit = False
     table.style = "Table Grid"
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        border = OxmlElement(f"w:{edge}")
+        border.set(qn("w:val"), "single")
+        border.set(qn("w:sz"), "4")
+        border.set(qn("w:space"), "0")
+        border.set(qn("w:color"), "D9D9D9")
+        borders.append(border)
+    table._tbl.tblPr.append(borders)
     set_repeat_table_header(table.rows[0])
     for index, label in enumerate(headers):
         cell = table.rows[0].cells[index]
@@ -176,6 +185,11 @@ def configure_document(doc: Document) -> None:
     section.left_margin = Inches(0.75)
     section.right_margin = Inches(0.75)
     styles = doc.styles
+    styles["Title"].font.name = "Arial"
+    styles["Title"]._element.rPr.rFonts.set(qn("w:ascii"), "Arial")
+    styles["Title"]._element.rPr.rFonts.set(qn("w:hAnsi"), "Arial")
+    styles["Title"].font.color.rgb = RGBColor.from_string("000000")
+    styles["Title"].font.size = Pt(27)
     normal = styles["Normal"]
     normal.font.name = "Arial"
     normal.font.size = Pt(10.5)
@@ -204,154 +218,72 @@ def build() -> None:
     eyebrow = doc.add_paragraph()
     eyebrow.paragraph_format.space_before = Pt(11)
     eyebrow.paragraph_format.space_after = Pt(8)
-    set_run_font(eyebrow.add_run("MODEL BRIEF  /  VERSION 1.0.0"), size=9, bold=True, color=TEAL)
-    title = doc.add_paragraph()
-    title.paragraph_format.space_after = Pt(3)
+    set_run_font(eyebrow.add_run("CURRENT RUNTIME MODEL  /  NOVEMBER 2026"), size=9, bold=True, color=TEAL)
+    title = doc.add_paragraph(style="Title")
+    title.paragraph_format.space_after = Pt(5)
     title.paragraph_format.keep_with_next = True
-    set_run_font(title.add_run("Privacy Policy Analyzer"), size=28, bold=True, color=INK)
-    subtitle = doc.add_paragraph()
-    subtitle.paragraph_format.space_after = Pt(13)
-    set_run_font(subtitle.add_run("AI Model Technical Guide"), size=19, bold=True, color=TEAL)
-    add_body(doc, "A practical guide to the trained clause tagger, its data, the API handoff, and the limits of the demo build.", color=MUTED, size=11, after=10)
-    add_callout(
-        doc,
-        "What is included",
-        "A compact OPP-115-trained topic classifier is integrated into the Flask API and React interface. It suggests policy topics for individual clauses. The existing versioned rules engine remains responsible for findings and the weighted Trust Score.",
-    )
+    set_run_font(title.add_run("ClearPolicy Natural Language Summary"), size=27, bold=True, color="000000")
+    add_body(doc, "ClearPolicy uses GPT to turn submitted privacy-policy text into a readable overview with source quotations, review points, and questions. The app presents the generated explanation as its analysis; it does not make a legal determination.", color=MUTED, size=11, after=10)
+
     add_heading(doc, "Model at a glance")
     add_table(
         doc,
-        ["Task", "Training", "Held-out baseline", "Runtime"],
-        [["Multi-label clause topic suggestions", "3,790 segments / 115 policies", "Micro F1 0.7119 at 0.5", "Python standard library; 6.75 MB JSON"]],
-        widths=[1.7, 1.7, 1.65, 1.9],
+        ["Setting", "Current value"],
+        [
+            ["Model", "GPT-6 Luna (gpt-6-luna), configurable with OPENAI_MODEL"],
+            ["API", "OpenAI Responses API"],
+            ["Task", "Generate a reader-focused explanation of the full policy text"],
+            ["Training", "The project does not fine-tune the hosted model"],
+            ["Response storage", "The request sets store=false"],
+        ],
+        widths=[1.55, 5.55],
+        font_size=9.2,
+    )
+
+    add_heading(doc, "What the model returns")
+    add_body(doc, "The backend sends the complete policy text to GPT-6 Luna. The model writes a short overview in everyday language, highlights useful details with quotations, identifies specific wording a reader may want to review, and suggests practical questions.")
+    add_body(doc, "Structured Outputs keeps the response organized into the fields the interface displays. The interface presents one explanation that readers can trace back to the source text.")
+
+    add_heading(doc, "How an analysis works")
+    add_table(
+        doc,
+        ["Stage", "Action"],
+        [
+            ["1. React interface", "Sends the pasted policy text to the Flask backend."],
+            ["2. Flask API", "Validates the text size and calls the configured GPT model."],
+            ["3. OpenAI Responses API", "Returns the structured explanation; response storage is disabled with store=false."],
+            ["4. Quote check", "The backend removes highlighted excerpts that do not appear in the submitted text."],
+            ["5. Results screen", "Displays the overview, key details, review wording, and reader questions."],
+        ],
+        widths=[1.65, 5.45],
         font_size=9.0,
     )
-    add_heading(doc, "Two signals, two jobs")
-    add_table(
-        doc,
-        ["Component", "What it returns", "Effect on Trust Score"],
-        [
-            ["Clause classifier", "Experimental topic tag(s) attached to policy text", "None"],
-            ["Rules and scoring engine", "Evidence-backed findings, five category assessments, and a weighted score", "Calculates the score using the documented weights"],
-        ],
-        widths=[1.55, 3.15, 2.25],
-        font_size=9.1,
-    )
-    add_body(doc, "The model's topic estimate is not a calibrated probability. It does not establish whether a practice is fair, trustworthy, lawful, or compliant.", color=MUTED, size=9.7, after=0)
 
-    doc.add_page_break()
-    add_heading(doc, "1. Training data and method")
-    add_body(doc, "The first supervised model uses OPP-115 v1.0, a research corpus of 115 website privacy policies with policy segments annotated by graduate students in law. Consolidated annotations supply the segment labels; policy text and labels are paired by policy ID and segment number. The training pipeline uses 3,790 labeled segments.")
-    add_callout(
-        doc,
-        "Why OPP-115 for this build",
-        "The project notes also identify PrivaSeer as a large potential source. PrivaSeer offers broad, mostly unlabeled policy text, while OPP-115 has human topic labels suited to supervised clause classification. This model therefore uses OPP-115; PrivaSeer remains a possible, separately licensed future resource.",
-        fill=SAND,
-    )
-    add_heading(doc, "Training pipeline", level=2)
-    for line in (
-        "1. Read sanitized policy segments and the 0.5-threshold consolidated annotations from the official corpus archive.",
-        "2. Combine annotator labels by segment so a segment can carry more than one topic.",
-        "3. Split by whole policy with seed 496: 92 policies for training and 23 unseen policies for validation.",
-        "4. Learn one-vs-rest multinomial Naive Bayes token counts with binary unigram and adjacent-bigram features.",
-        "5. Measure held-out quality at a fixed 0.5 score threshold, then train the final distributable weights on all 115 policies.",
-    ):
-        add_body(doc, line, size=9.8, after=3)
-    add_heading(doc, "How the research labels map to the UI", level=2)
-    add_table(
-        doc,
-        ["OPP-115 topic label(s)", "Product category"],
-        [
-            ["First Party Collection/Use", "Data collection"],
-            ["Third Party Sharing/Collection", "Data sharing"],
-            ["User Choice/Control; User Access, Edit and Deletion; Do Not Track", "User agency"],
-            ["Data Retention; Data Security; Policy Change; International and Specific Audiences", "Legal language"],
-            ["Other", "No mapped product category"],
-            ["Readability", "Not learned from OPP-115; remains a separate text-length heuristic"],
-        ],
-        widths=[4.4, 2.55],
-        font_size=8.8,
-    )
+    add_heading(doc, "Grounding and limitations")
+    add_body(doc, "The prompt asks the model to explain only what the submitted text supports and to avoid legal, fairness, or trustworthiness judgments. Key details and review points include short quotations. The backend checks that each quotation occurs in the policy text, but an exact quote does not guarantee that its explanation is complete or correct.")
+    add_body(doc, "The response contains summary, key_points, things_to_review, and reader_questions. The project has not yet evaluated summary quality against a held-out set of policies reviewed by people. Users should compare important statements with the complete policy.")
 
-    doc.add_page_break()
-    add_heading(doc, "2. Evaluation and limits")
-    add_body(doc, "The validation set contains 862 segments from 23 policies not used in training. Holding out whole policies reduces leakage from repeated writing within a single policy. Metrics below use the model's fixed 0.5 decision threshold.")
-    add_table(
-        doc,
-        ["Metric", "Held-out result", "How to read it"],
-        [
-            ["Micro precision", "0.7633", "Of predicted labels, about 76% matched a held-out annotation."],
-            ["Micro recall", "0.6669", "The model found about 67% of held-out annotation labels."],
-            ["Micro F1", "0.7119", "Combined precision and recall across labels."],
-            ["Macro F1", "0.6150", "Average label-level F1; exposes weaker rare categories."],
-            ["Exact label-set match", "0.3805", "All labels for a segment matched in about 38% of examples."],
-        ],
-        widths=[1.55, 1.25, 4.15],
-        font_size=8.8,
-    )
-    add_heading(doc, "Uneven category performance", level=2)
-    add_table(
-        doc,
-        ["Label", "F1", "Positive holdout segments"],
-        [
-            ["First Party Collection/Use", "0.7671", "356"],
-            ["Third Party Sharing/Collection", "0.7654", "255"],
-            ["Data Retention", "0.2439", "34"],
-            ["User Access, Edit and Deletion", "0.5111", "63"],
-            ["Do Not Track", "0.5000", "6"],
-        ],
-        widths=[3.65, 1.2, 2.1],
-        font_size=8.8,
-    )
-    add_body(doc, "Some categories are substantially weaker. Do Not Track has only six positive validation examples, making its score especially uncertain. Treat this as a baseline for a class demo, not a guarantee for current policies.", color=MUTED, size=9.5)
-    add_heading(doc, "Known limitations", level=2)
-    for line in (
-        "OPP-115 is a small, historical 2016 corpus of English website policies; modern wording and app notices may differ.",
-        "The labels describe policy topics, not whether a practice is good, bad, or legally compliant.",
-        "Class balance is uneven. The model can miss secondary topics or suggest a topic for ambiguous wording.",
-        "Scores are uncalibrated Naive Bayes estimates. No label above the threshold does not mean a clause is unimportant.",
-    ):
-        add_bullet(doc, line)
+    add_heading(doc, "Privacy and configuration")
+    add_body(doc, "Policy text is sent to OpenAI for analysis. The app sets store=false on the Responses API request. The project backend does not save submitted text to a database or application logs. Review the API account's data controls before using this prototype with sensitive material.")
+    add_body(doc, "Set OPENAI_API_KEY in the backend environment before starting Flask; do not place the key in the React frontend. The model ID defaults to gpt-6-luna and can be changed with OPENAI_MODEL. The /healthz endpoint reports the configured model ID.")
 
-    doc.add_page_break()
-    add_heading(doc, "3. Integration and demo")
-    add_heading(doc, "Request-to-result path", level=2)
-    add_table(
-        doc,
-        ["1  React UI", "2  Flask API", "3  Two analyzers", "4  UI response"],
-        [["Policy text is split into clauses", "POST /api/v1/analyses", "Classifier tags clauses; rules engine scores evidence", "Categories, findings, and AI tags are displayed"]],
-        widths=[1.7, 1.55, 2.1, 1.6],
-        font_size=8.4,
-    )
-    add_body(doc, "The API response adds `classifier_version` and `clause_classifications` to the existing contract. Each classification contains a clause ID, short excerpt, and up to three labels whose model score is at least 0.5. The interface displays the highest-scoring mapped label for a clause and shows that tags are experimental.")
-    add_heading(doc, "Run the local demo", level=2)
-    for line in (
-        "Terminal 1: python backend/app.py",
-        "Terminal 2: pnpm dev",
-        "Open the Vite address printed by the UI command. Select Try sample policy or upload public/sample_privacy_policy.txt, then choose Analyze policy.",
-        "Point out the Trust Score, rule findings, AI clause tags, and the disclaimer. Explain that topic suggestions do not affect the score.",
-    ):
-        add_body(doc, line, size=9.6, after=4)
-    add_body(doc, "The sample policy is fictional and intentionally mentions collection, advertising sharing, open-ended retention, user requests, and security. The presenter script is in demo/DEMO_SCRIPT.md.", color=MUTED, size=9.5)
-    add_heading(doc, "Privacy and licensing", level=2)
-    add_body(doc, "The API processes text in memory and does not persist submitted policy text. Logs omit text and excerpts. Keep API authentication and request limits enabled outside local development.")
-    add_body(doc, "The OPP-115 project limits use to research, teaching, and scholarship, with terms in the spirit of CC BY-NC. This package is for the team's non-commercial academic demo; it does not grant commercial rights. The original policy archive is not included. Ask the dataset rights holders before commercial use or broader redistribution.", size=9.4)
+    add_heading(doc, "Intended use")
+    add_body(doc, "The generated explanation is an educational reading aid. It may omit details, misinterpret wording, or miss context in an incomplete document. It does not establish what an organization does in practice and is not legal advice or a legal compliance determination.")
+
+    add_heading(doc, "OpenAI API references")
     sources = doc.add_paragraph()
     sources.paragraph_format.space_before = Pt(2)
     sources.paragraph_format.space_after = Pt(3)
-    set_run_font(sources.add_run("Dataset and citation: "), size=9.1, bold=True, color=INK)
-    add_hyperlink(sources, "Usable Privacy Policy Project - OPP-115 and terms", "https://www.usableprivacy.org/data/")
-    set_run_font(sources.add_run("  |  Related source: "), size=9.1, color=INK)
-    add_hyperlink(sources, "PrivaSeer data and code", "https://privaseer.ist.psu.edu/data")
-    add_body(doc, "Wilson et al. (2016), “The Creation and Analysis of a Website Privacy Policy Corpus,” ACL 2016, describes the corpus and annotation work.", size=9.1, after=1)
-    citation = doc.add_paragraph()
-    citation.paragraph_format.space_after = Pt(0)
-    add_hyperlink(citation, "ACL Anthology paper P16-1126", "https://aclanthology.org/P16-1126/")
+    set_run_font(sources.add_run("Model catalog: "), size=9.1, bold=True, color=INK)
+    add_hyperlink(sources, "OpenAI models", "https://developers.openai.com/api/docs/models")
+    set_run_font(sources.add_run("  |  API: "), size=9.1, color=INK)
+    add_hyperlink(sources, "Responses API", "https://developers.openai.com/api/reference/resources/responses/methods/create")
+    set_run_font(sources.add_run("  |  Output format: "), size=9.1, color=INK)
+    add_hyperlink(sources, "Structured Outputs", "https://developers.openai.com/api/docs/guides/structured-outputs")
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     doc.save(OUTPUT)
     print(OUTPUT)
-
 
 if __name__ == "__main__":
     build()

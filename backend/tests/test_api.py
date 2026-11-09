@@ -8,9 +8,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app import create_app
 
 
+class StubPolicyAnalyzer:
+    model = "test-model"
+
+    def analyze_text(self, _text):
+        return {
+            "summary": "Test summary.",
+            "key_points": [
+                {"explanation": "Test detail.", "evidence_excerpt": "We collect your name"}
+            ],
+            "things_to_review": [],
+            "reader_questions": ["What information is collected?"],
+        }
+
+
 class ApiTests(unittest.TestCase):
     def setUp(self):
-        app = create_app()
+        app = create_app({"AI_ANALYZER": StubPolicyAnalyzer()})
         app.config.update(TESTING=True, RATE_LIMIT=20, RATE_WINDOW_SECONDS=60)
         self.client = app.test_client()
         fixture = Path(__file__).resolve().parents[2] / "fixtures" / "analysis-request.sample.json"
@@ -21,14 +35,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("ok", response.get_json()["status"])
 
-    def test_analysis_returns_structured_evidence_backed_response(self):
+    def test_analysis_returns_plain_language_summary(self):
         response = self.client.post("/api/v1/analyses", json=self.payload)
         body = response.get_json()
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual("0.1.0", body["engine_version"])
-        self.assertIn("trust_score", body)
-        self.assertTrue(body["findings"][0]["evidence"])
+        self.assertEqual("test-model", body["model"])
+        self.assertEqual("Test summary.", body["summary"])
+        self.assertTrue(body["key_points"][0]["evidence_excerpt"])
         self.assertIn("not legal advice", body["disclaimer"])
 
     def test_invalid_payload_has_safe_structured_error(self):
@@ -42,14 +56,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual("unsupported_media_type", response.get_json()["error"]["code"])
 
     def test_api_token_is_required_when_configured(self):
-        app = create_app()
+        app = create_app({"AI_ANALYZER": StubPolicyAnalyzer()})
         app.config.update(TESTING=True, ANALYSIS_API_TOKEN="test-token")
         client = app.test_client()
         self.assertEqual(401, client.post("/api/v1/analyses", json=self.payload).status_code)
         self.assertEqual(200, client.post("/api/v1/analyses", json=self.payload, headers={"X-Analysis-Token": "test-token"}).status_code)
 
     def test_rate_limit_rejects_excess_requests(self):
-        app = create_app()
+        app = create_app({"AI_ANALYZER": StubPolicyAnalyzer()})
         app.config.update(TESTING=True, RATE_LIMIT=1, RATE_WINDOW_SECONDS=60)
         client = app.test_client()
         self.assertEqual(200, client.post("/api/v1/analyses", json=self.payload).status_code)
