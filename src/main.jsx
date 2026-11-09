@@ -54,11 +54,30 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: policy }),
       })
-      const body = await response.json()
-      if (!response.ok) throw new Error(body.error?.message || 'The summary could not be generated.')
+      const responseText = await response.text()
+      let body = null
+      if (responseText.trim()) {
+        try {
+          body = JSON.parse(responseText)
+        } catch {
+          body = null
+        }
+      }
+      if (!response.ok) {
+        if (body?.error?.message) throw new Error(body.error.message)
+        if (!responseText.trim()) {
+          throw new Error(`The summary service returned an empty response (HTTP ${response.status}). Check that Flask is running in the backend terminal.`)
+        }
+        throw new Error(`The summary service returned an unreadable response (HTTP ${response.status}). Check the backend terminal for details.`)
+      }
+      if (!body || typeof body.summary !== 'string' || !body.summary.trim()) {
+        throw new Error(`The summary service returned an empty or unreadable response (HTTP ${response.status}). Check the backend terminal for details.`)
+      }
       setResult(body)
     } catch (requestError) {
-      setError(requestError.message || 'The summary could not be generated.')
+      setError(requestError instanceof TypeError
+        ? 'Could not reach the summary service. Check that Flask is running in the backend terminal, then try again.'
+        : requestError.message || 'The summary could not be generated.')
     } finally {
       setLoading(false)
     }
